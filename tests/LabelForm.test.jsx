@@ -13,31 +13,31 @@ const empty = {
 describe('LabelForm', () => {
   it('renders product name field', () => {
     render(<LabelForm data={empty} onChange={() => {}} onSave={() => {}} />)
-    expect(screen.getByLabelText(/productnaam/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/product name/i)).toBeInTheDocument()
   })
 
   it('renders all 9 nutrition fields', () => {
     render(<LabelForm data={empty} onChange={() => {}} onSave={() => {}} />)
-    expect(screen.getByLabelText(/energie \(kJ\)/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/energie \(kcal\)/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/vet \(g\)/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/verzadigd/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/koolhydraten/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/suikers/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/vezels/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/eiwitten/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/zout/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/energy \(kJ\)/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/energy \(kcal\)/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/fat \(g\)/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/saturated/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/carbohydrates/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/sugars/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/fibre/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/protein/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/salt/i)).toBeInTheDocument()
   })
 
   it('calls onChange when a field changes', () => {
     const onChange = vi.fn()
     render(<LabelForm data={empty} onChange={onChange} onSave={() => {}} />)
-    fireEvent.change(screen.getByLabelText(/productnaam/i), { target: { value: 'Koekjes' } })
+    fireEvent.change(screen.getByLabelText(/product name/i), { target: { value: 'Koekjes' } })
     expect(onChange).toHaveBeenCalledWith('product_name', 'Koekjes')
   })
 
-  it('renders Save & Preview button', () => {
+  it('renders Save button', () => {
     render(<LabelForm data={empty} onChange={() => {}} onSave={() => {}} />)
-    expect(screen.getByRole('button', { name: /opslaan/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument()
   })
 })
