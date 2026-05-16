@@ -27,7 +27,7 @@ const EN = {
   new_btn_print: '🖨 Print',
   new_btn_edit: '← Edit',
   form_product_name: 'Product name',
-  form_ingredients: 'Ingrediënten',
+  form_ingredients: 'Ingrediënten', // Dutch required on label regardless of UI language
   form_allergens: 'Allergens (Kan bevatten)',
   form_storage: 'Storage (Bewaren)',
   form_manufacturer: 'Manufacturer / Importer',
@@ -133,6 +133,7 @@ export function LanguageProvider({ children }) {
   }, [])
 
   function setLang(l) {
+    if (l !== 'en' && l !== 'nl') return
     setLangState(l)
     window.api.config.set('language', l)
   }

@@ -1,6 +1,6 @@
 // tests/i18n.test.jsx
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { LanguageProvider, useT } from '../src/i18n.js'
 
