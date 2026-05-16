@@ -55,7 +55,7 @@ function saveLabel(data) {
 }
 
 function listLabels() {
-  return db.prepare('SELECT * FROM labels ORDER BY created_at DESC').all()
+  return db.prepare('SELECT * FROM labels ORDER BY created_at DESC, id DESC').all()
 }
 
 function getLabel(id) {
