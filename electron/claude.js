@@ -26,12 +26,10 @@ Translate all text to Dutch. If a value cannot be determined, use an empty strin
 }
 
 function parseExtractedJson(text) {
-  // Try direct parse first
   try {
     return JSON.parse(text.trim())
   } catch {}
 
-  // Try extracting from markdown code block
   const codeBlock = text.match(/```(?:json)?\s*([\s\S]*?)```/)
   if (codeBlock) {
     try {
@@ -39,7 +37,6 @@ function parseExtractedJson(text) {
     } catch {}
   }
 
-  // Try finding first { ... } block
   const braceMatch = text.match(/\{[\s\S]*\}/)
   if (braceMatch) {
     try {
@@ -50,8 +47,12 @@ function parseExtractedJson(text) {
   return null
 }
 
-async function extractFromImage(imagePath, apiKey) {
-  const client = new Anthropic({ apiKey })
+async function claudeExtract(imagePath, config) {
+  const { anthropicApiKey: apiKey, anthropicBaseUrl: baseUrl } = config
+  const client = new Anthropic({
+    apiKey,
+    ...(baseUrl ? { baseURL: baseUrl } : {}),
+  })
   const imageData = readFileSync(imagePath)
   const base64 = imageData.toString('base64')
   const ext = imagePath.split('.').pop().toLowerCase()
@@ -75,4 +76,4 @@ async function extractFromImage(imagePath, apiKey) {
   return parseExtractedJson(text)
 }
 
-module.exports = { extractFromImage, parseExtractedJson, buildPrompt }
+module.exports = { claudeExtract, parseExtractedJson, buildPrompt }
