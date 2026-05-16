@@ -3,27 +3,38 @@ const { readFileSync } = require('fs')
 
 function buildPrompt() {
   return `You are a food label data extractor. Examine this product packaging image carefully.
-Extract all product information visible on the packaging and return ONLY valid JSON — no other text — with exactly these fields:
+
+Look for a nutrition facts table (often titled "Gemiddelde voedingswaarden" or "Voedingswaarden per 100g").
+Extract the numbers from that table:
+- "Energie" row → energy_kj (kJ number) and energy_kcal (kcal number). Example: "2187 kJ / 524 kcal" → energy_kj="2187", energy_kcal="524"
+- "Vetten" or "Vet" row (total) → fat_total. Example: "30 g" → fat_total="30"
+- "waarvan verzadigde vetzuren" row → fat_saturated
+- "Koolhydraten" row (total) → carbs_total
+- "waarvan suikers" row → carbs_sugars
+- "Vezels" row → fiber
+- "Eiwitten" row → protein
+- "Zout" row → salt
+- Net weight (e.g. "100g", "200g") anywhere on pack → net_weight
+
+Return ONLY this JSON object, no markdown, no explanation:
 {
   "product_name": "product name in Dutch",
-  "ingredients": "Ingrediënten: full ingredients list translated to Dutch",
+  "ingredients": "Ingrediënten: full list in Dutch",
   "allergens": "Kan bevatten: allergen statement in Dutch",
-  "storage_info": "Bewaren ... storage instructions in Dutch",
+  "storage_info": "Bewaren: storage instructions in Dutch",
   "manufacturer": "Fabrikant/Importeur: name and address",
   "net_weight": "e.g. 100g",
-  "energy_kj": "numeric value only e.g. 2187",
-  "energy_kcal": "numeric value only e.g. 521",
-  "fat_total": "numeric value only e.g. 36",
-  "fat_saturated": "numeric value only e.g. 16",
-  "carbs_total": "numeric value only e.g. 58",
-  "carbs_sugars": "numeric value only e.g. 33",
-  "fiber": "numeric value only e.g. 0.5",
-  "protein": "numeric value only e.g. 6.6",
-  "salt": "numeric value only e.g. 0.36"
+  "energy_kj": "number only e.g. 2187",
+  "energy_kcal": "number only e.g. 524",
+  "fat_total": "number only e.g. 30",
+  "fat_saturated": "number only e.g. 16",
+  "carbs_total": "number only e.g. 58",
+  "carbs_sugars": "number only e.g. 33",
+  "fiber": "number only e.g. 0.5",
+  "protein": "number only e.g. 6.6",
+  "salt": "number only e.g. 0.36"
 }
-Use standard Dutch food label terminology (Ingrediënten, Kan bevatten, Bewaren, Gemiddelde voedingswaarden).
-Translate all text to Dutch. If a value cannot be determined, use an empty string.
-IMPORTANT: Output ONLY the raw JSON object. No markdown fences, no explanation, no text before or after. Start your response with { and end with }.`
+If a value is not visible, use "". Start response with { and end with }.`
 }
 
 function parseFromText(text) {

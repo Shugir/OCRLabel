@@ -44,7 +44,13 @@ async function ollamaExtract(imagePath, config) {
             if (json.error) {
               reject(new Error(json.error))
             } else {
-              resolve(parseExtractedJson(json.message?.content || ''))
+              const content = json.message?.content || ''
+              require('fs').writeFileSync(
+                require('path').join(require('os').homedir(), '.ocrlabel', 'ollama-debug.txt'),
+                content,
+                'utf8'
+              )
+              resolve(parseExtractedJson(content))
             }
           } catch {
             reject(new Error('Invalid response from Ollama'))
