@@ -1,5 +1,18 @@
 // electron/ollama.js
-const { parseExtractedJson, buildPrompt } = require('./claude')
+const { parseExtractedJson } = require('./claude')
+
+function buildOllamaPrompt() {
+  return `Read ALL text visible on this product packaging image and transcribe it exactly as written. Include:
+- Product name
+- Complete ingredients list (Ingrediënten)
+- Allergen statement (Kan bevatten)
+- Storage instructions (Bewaren)
+- Manufacturer / importer information
+- Net weight (Netto gewicht)
+- The complete nutrition table with every row and number (Gemiddelde voedingswaarden per 100 g)
+
+Output only the raw transcribed text. Do not summarize or reformat anything.`
+}
 
 async function ollamaExtract(imagePath, config) {
   const { ollamaHost = 'http://localhost:11434', ollamaModel = 'llama3.2-vision' } = config
@@ -13,7 +26,7 @@ async function ollamaExtract(imagePath, config) {
     messages: [
       {
         role: 'user',
-        content: buildPrompt(),
+        content: buildOllamaPrompt(),
         images: [base64],
       },
     ],

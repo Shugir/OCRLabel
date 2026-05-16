@@ -43,35 +43,46 @@ function parseFromText(text) {
     return m ? m[1].replace(',', '.') : ''
   }
 
-  const energyM = text.match(/Energie[^\d]*(\d+(?:[,.]\d+)?)\s*kJ[^\/\d]*(\d+(?:[,.]\d+)?)\s*kcal/i)
-  const energy_kj = energyM ? energyM[1] : ''
+  // "Energie    2187 kJ / 524 kcal"
+  const energyM = text.match(/Energie[\s\t]+(\d+(?:[,.]\d+)?)\s*kJ\s*[\/]\s*(\d+(?:[,.]\d+)?)\s*kcal/i)
+             || text.match(/Energie[\s\S]{0,10}?(\d{3,4})\s*kJ[\s\S]{0,10}?(\d{3,4})\s*kcal/i)
+  const energy_kj   = energyM ? energyM[1] : ''
   const energy_kcal = energyM ? energyM[2] : ''
 
-  const fat_total = num(/Vetten\s+(\d+(?:[,.]\d+)?)/i)
-  const fat_saturated = num(/verzadigde\s+vetzuren\s+(\d+(?:[,.]\d+)?)/i)
-  const carbs_total = num(/Koolhydraten\s+(\d+(?:[,.]\d+)?)/i)
-  const carbs_sugars = num(/(?:waarvan\s+)?suikers\s+(\d+(?:[,.]\d+)?)/i)
-  const fiber = num(/Vezels\s+(\d+(?:[,.]\d+)?)/i)
-  const protein = num(/Eiwitten\s+(\d+(?:[,.]\d+)?)/i)
-  const salt = num(/Zout\s+(\d+(?:[,.]\d+)?)/i)
+  // "Vetten    30 g"  (not "waarvan")
+  const fat_total     = num(/^Vetten[\s\t]+(\d+(?:[,.]\d+)?)/im)
+                     || num(/Vetten[\s\t]+(\d+(?:[,.]\d+)?)/i)
+  const fat_saturated = num(/verzadigde\s+vetzuren[\s\t]+(\d+(?:[,.]\d+)?)/i)
+  const carbs_total   = num(/^Koolhydraten[\s\t]+(\d+(?:[,.]\d+)?)/im)
+                     || num(/Koolhydraten[\s\t]+(\d+(?:[,.]\d+)?)/i)
+  const carbs_sugars  = num(/suikers[\s\t]+(\d+(?:[,.]\d+)?)/i)
+  const fiber         = num(/Vezels[\s\t]+(\d+(?:[,.]\d+)?)/i)
+  const protein       = num(/Eiwitten[\s\t]+(\d+(?:[,.]\d+)?)/i)
+  const salt          = num(/Zout[\s\t]+(\d+(?:[,.]\d+)?)/i)
 
-  const ingM = text.match(/Ingredi[eë]nten[:\s]+([\s\S]*?)(?:\n\n|Kan bevatten|Bewaren|$)/i)
-  const ingredients = ingM ? 'Ingrediënten: ' + ingM[1].replace(/\n/g, ' ').trim() : ''
+  // Ingredients — up to "Kan bevatten", "Bewaren", or double newline
+  const ingM = text.match(/Ingredi[eë]nten[:\s]+([\s\S]*?)(?=\n\n|Kan bevatten|Bewaren|Melkvulling|Gemiddelde|$)/i)
+  const ingredients = ingM ? 'Ingrediënten: ' + ingM[1].replace(/\n/g, ' ').trim().replace(/\s+/g, ' ') : ''
 
-  const algM = text.match(/Kan bevatten[:\s]+([^\n.]+)/i)
-  const allergens = algM ? 'Kan bevatten: ' + algM[1].trim() : ''
+  // Allergens — collect full sentence including periods
+  const algM = text.match(/Kan bevatten[:\s]+([\s\S]*?)(?=\n\n|Bewaren|Melkvulling|Gemiddelde|$)/i)
+  const allergens = algM ? 'Kan bevatten: ' + algM[1].replace(/\n/g, ' ').trim().replace(/\s+/g, ' ') : ''
 
-  const storM = text.match(/Bewaren[:\s]+([^\n.]+)/i)
-  const storage_info = storM ? 'Bewaren ' + storM[1].trim() : ''
+  // Storage — collect until next section
+  const storM = text.match(/Bewaren[\s\S]*?(?=\n\n|Geproduceerd|Fabrikant|Importeur|Gemiddelde|$)/i)
+  const storage_info = storM ? storM[0].replace(/\n/g, ' ').trim().replace(/\s+/g, ' ') : ''
 
-  const mfgM = text.match(/(?:Fabrikant|Importeur|Produced by|Manufactured)[:\s]+([^\n]+)/i)
-  const manufacturer = mfgM ? mfgM[1].trim() : ''
+  // Manufacturer — take Fabrikant + Importeur lines
+  const fabM = text.match(/(?:Fabrikant|Importeur)[:\s]+([\s\S]*?)(?=\n\n|Gemiddelde|Netto|$)/i)
+  const manufacturer = fabM ? fabM[0].replace(/\n/g, ' ').trim().replace(/\s+/g, ' ') : ''
 
-  const wtM = text.match(/Netto[:\s]+([^\n]+)/i) || text.match(/(\d+\s*g)\b/)
+  // Net weight: "Netto gewicht: 100 g" or "100 g e"
+  const wtM = text.match(/Netto\s+gewicht[:\s]+([^\n,]+)/i) || text.match(/(\d+\s*g)\s*(?:e\b|$|\n)/i)
   const net_weight = wtM ? wtM[1].trim() : ''
 
-  const nameM = text.match(/^([^\n]+)/i)
-  const product_name = nameM ? nameM[1].trim() : ''
+  // Product name: first non-empty line, strip leading "(NL) "
+  const nameM = text.match(/^(?:\(NL\)\s*)?(.+)/im)
+  const product_name = nameM ? nameM[1].replace(/\.$/, '').trim() : ''
 
   if (!energy_kj && !fat_total && !protein) return null
 
