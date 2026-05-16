@@ -84,7 +84,7 @@ function parseFromText(text) {
   const nameM = text.match(/^(?:\(NL\)\s*)?(.+)/im)
   const product_name = nameM ? nameM[1].replace(/\.$/, '').trim() : ''
 
-  const hasAny = product_name || ingredients || energy_kj || fat_total || protein
+  const hasAny = ingredients || allergens || energy_kj || fat_total || protein
   if (!hasAny) return null
 
   return {
