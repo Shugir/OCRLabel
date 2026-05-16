@@ -2,16 +2,14 @@
 const { parseExtractedJson } = require('./claude')
 
 function buildOllamaPrompt() {
-  return `Read ALL text visible on this product packaging image and transcribe it exactly as written. Include:
-- Product name
-- Complete ingredients list (Ingrediënten)
-- Allergen statement (Kan bevatten)
-- Storage instructions (Bewaren)
-- Manufacturer / importer information
-- Net weight (Netto gewicht)
-- The complete nutrition table with every row and number (Gemiddelde voedingswaarden per 100 g)
+  return `You are reading a food product packaging image. The packaging may have text in multiple languages.
 
-Output only the raw transcribed text. Do not summarize or reformat anything.`
+Focus on finding:
+1. The DUTCH text sections (Nederlands/NL) — look for words like "Ingrediënten", "Kan bevatten", "Bewaren", "Netto gewicht"
+2. The nutrition facts table — look for "Gemiddelde voedingswaarden" or "Voedingswaarden per 100 g" with rows like Energie, Vetten, Koolhydraten, Vezels, Eiwitten, Zout
+3. If no Dutch text is visible, transcribe ALL text you can see including any nutrition table in any language
+
+Transcribe all found text exactly as written. Do not summarize. Include every number from the nutrition table.`
 }
 
 async function ollamaExtract(imagePath, config) {

@@ -43,9 +43,9 @@ function parseFromText(text) {
     return m ? m[1].replace(',', '.') : ''
   }
 
-  // "Energie    2187 kJ / 524 kcal"
-  const energyM = text.match(/Energie[\s\t]+(\d+(?:[,.]\d+)?)\s*kJ\s*[\/]\s*(\d+(?:[,.]\d+)?)\s*kcal/i)
-             || text.match(/Energie[\s\S]{0,10}?(\d{3,4})\s*kJ[\s\S]{0,10}?(\d{3,4})\s*kcal/i)
+  // "Energie    2187 kJ / 524 kcal" or "Энергия 2187 кДж / 524 ккал"
+  const energyM = text.match(/(?:Energie|Энергия|Energy)[\s\t]+(\d+(?:[,.]\d+)?)\s*(?:kJ|кДж)\s*[\/]\s*(\d+(?:[,.]\d+)?)\s*(?:kcal|ккал)/i)
+             || text.match(/(?:Energie|Энергия|Energy)[\s\S]{0,10}?(\d{3,4})\s*(?:kJ|кДж)[\s\S]{0,10}?(\d{3,4})\s*(?:kcal|ккал)/i)
   const energy_kj   = energyM ? energyM[1] : ''
   const energy_kcal = energyM ? energyM[2] : ''
 
@@ -84,7 +84,8 @@ function parseFromText(text) {
   const nameM = text.match(/^(?:\(NL\)\s*)?(.+)/im)
   const product_name = nameM ? nameM[1].replace(/\.$/, '').trim() : ''
 
-  if (!energy_kj && !fat_total && !protein) return null
+  const hasAny = product_name || ingredients || energy_kj || fat_total || protein
+  if (!hasAny) return null
 
   return {
     product_name, ingredients, allergens, storage_info, manufacturer, net_weight,
