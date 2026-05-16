@@ -25,7 +25,7 @@ describe('Home', () => {
   it('shows empty state when no labels', async () => {
     renderHome()
     await waitFor(() => {
-      expect(screen.getByText(/nog geen etiketten/i)).toBeInTheDocument()
+      expect(screen.getByText(/no labels yet/i)).toBeInTheDocument()
     })
   })
 
@@ -51,7 +51,7 @@ describe('Home', () => {
     ])
     renderHome()
     await waitFor(() => screen.getByText('Wafels'))
-    fireEvent.click(screen.getByRole('button', { name: /verwijder/i }))
+    fireEvent.click(screen.getByRole('button', { name: /delete/i }))
     await waitFor(() => {
       expect(window.api.label.delete).toHaveBeenCalledWith(1)
     })
