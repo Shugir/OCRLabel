@@ -12,12 +12,23 @@ Focus on finding:
 Transcribe all found text exactly as written. Do not summarize. Include every number from the nutrition table.`
 }
 
+function resizeImageBase64(imagePath) {
+  const { nativeImage } = require('electron')
+  const img = nativeImage.createFromPath(imagePath)
+  const { width, height } = img.getSize()
+  const maxDim = 1024
+  if (width > maxDim || height > maxDim) {
+    const scale = maxDim / Math.max(width, height)
+    const resized = img.resize({ width: Math.round(width * scale), height: Math.round(height * scale) })
+    return resized.toJPEG(85).toString('base64')
+  }
+  return img.toJPEG(85).toString('base64')
+}
+
 async function ollamaExtract(imagePath, config) {
   const { ollamaHost = 'http://localhost:11434', ollamaModel = 'llama3.2-vision' } = config
 
-  const { readFileSync } = await import('fs')
-  const imageData = readFileSync(imagePath)
-  const base64 = imageData.toString('base64')
+  const base64 = resizeImageBase64(imagePath)
 
   const body = JSON.stringify({
     model: ollamaModel,
@@ -41,6 +52,7 @@ async function ollamaExtract(imagePath, config) {
         port: url.port || (url.protocol === 'https:' ? 443 : 80),
         path: url.pathname,
         method: 'POST',
+        timeout: 300000,
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(body),
@@ -69,6 +81,11 @@ async function ollamaExtract(imagePath, config) {
         })
       }
     )
+
+    req.on('timeout', () => {
+      req.destroy()
+      reject(new Error('Ollama timed out after 5 minutes. Try a smaller/faster model.'))
+    })
 
     req.on('error', (e) => {
       if (e.code === 'ECONNREFUSED') {
