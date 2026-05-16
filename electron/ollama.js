@@ -12,23 +12,11 @@ Focus on finding:
 Transcribe all found text exactly as written. Do not summarize. Include every number from the nutrition table.`
 }
 
-function resizeImageBase64(imagePath) {
-  const { nativeImage } = require('electron')
-  const img = nativeImage.createFromPath(imagePath)
-  const { width, height } = img.getSize()
-  const maxDim = 1024
-  if (width > maxDim || height > maxDim) {
-    const scale = maxDim / Math.max(width, height)
-    const resized = img.resize({ width: Math.round(width * scale), height: Math.round(height * scale) })
-    return resized.toJPEG(85).toString('base64')
-  }
-  return img.toJPEG(85).toString('base64')
-}
-
 async function ollamaExtract(imagePath, config) {
   const { ollamaHost = 'http://localhost:11434', ollamaModel = 'llama3.2-vision' } = config
 
-  const base64 = resizeImageBase64(imagePath)
+  const { readFileSync } = await import('fs')
+  const base64 = readFileSync(imagePath).toString('base64')
 
   const body = JSON.stringify({
     model: ollamaModel,
