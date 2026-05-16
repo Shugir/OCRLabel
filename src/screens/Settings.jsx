@@ -39,7 +39,7 @@ function BackendToggle({ value, onChange }) {
 }
 
 export default function Settings() {
-  const { t } = useT()
+  const { t, lang, setLang } = useT()
   const [aiBackend, setAiBackend] = useState('claude')
   const [apiKey, setApiKey] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
@@ -75,6 +75,26 @@ export default function Settings() {
   return (
     <div style={{ maxWidth: 480, margin: '40px auto', padding: 24 }}>
       <h2 style={{ marginBottom: 24 }}>{t('settings_title')}</h2>
+
+      <div style={{ marginBottom: 8, fontWeight: 'bold' }}>{t('settings_language')}</div>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+        {['en', 'nl'].map((l) => (
+          <button
+            key={l}
+            onClick={() => setLang(l)}
+            style={{
+              padding: '4px 12px',
+              cursor: 'pointer',
+              fontWeight: lang === l ? 'bold' : 'normal',
+              background: lang === l ? '#333' : '#fff',
+              color: lang === l ? '#fff' : '#333',
+              border: '1px solid #ccc',
+            }}
+          >
+            {l.toUpperCase()}
+          </button>
+        ))}
+      </div>
 
       <div style={{ marginBottom: 8, fontWeight: 'bold' }}>{t('settings_ai_backend')}</div>
       <BackendToggle value={aiBackend} onChange={setAiBackend} />
