@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useT } from '../i18n.js'
 import LabelForm from '../components/LabelForm.jsx'
 import LabelPreview from '../components/LabelPreview.jsx'
 
@@ -19,6 +20,7 @@ export default function NewLabel() {
   const [savedId, setSavedId] = useState(null)
   const previewRef = useRef(null)
   const navigate = useNavigate()
+  const { t } = useT()
 
   function handleChange(key, value) {
     setData((prev) => ({ ...prev, [key]: value }))
@@ -35,10 +37,10 @@ export default function NewLabel() {
       if (extracted) {
         setData({ ...EMPTY, ...extracted })
       } else {
-        setError('Kon geen productgegevens herkennen. Vul de velden handmatig in.')
+        setError(t('new_err_extract'))
       }
     } catch (e) {
-      setError(e.message || 'Fout bij herkenning.')
+      setError(e.message)
     } finally {
       setLoading(false)
     }
@@ -61,10 +63,10 @@ export default function NewLabel() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <div style={{ padding: '12px 24px', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', gap: 16 }}>
-        <button onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>← Terug</button>
-        <h2 style={{ flex: 1, margin: 0 }}>Nieuw etiket</h2>
+        <button onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>{t('new_btn_back')}</button>
+        <h2 style={{ flex: 1, margin: 0 }}>{t('new_title')}</h2>
         <button onClick={handlePickImage} disabled={loading} style={{ padding: '6px 14px', cursor: 'pointer' }}>
-          {loading ? 'Herkennen…' : '📷 Afbeelding kiezen'}
+          {loading ? t('new_btn_picking') : t('new_btn_pick')}
         </button>
       </div>
 
@@ -75,20 +77,20 @@ export default function NewLabel() {
       )}
 
       <div style={{ display: 'flex', borderBottom: '1px solid #ddd' }}>
-        {['edit', 'preview'].map((t) => (
+        {['edit', 'preview'].map((tabKey) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabKey}
+            onClick={() => setTab(tabKey)}
             style={{
               padding: '8px 20px',
               cursor: 'pointer',
-              borderBottom: tab === t ? '2px solid #000' : '2px solid transparent',
+              borderBottom: tab === tabKey ? '2px solid #000' : '2px solid transparent',
               background: 'none',
-              fontWeight: tab === t ? 'bold' : 'normal',
+              fontWeight: tab === tabKey ? 'bold' : 'normal',
               fontSize: 14,
             }}
           >
-            {t === 'edit' ? 'Bewerken' : 'Voorbeeld'}
+            {tabKey === 'edit' ? t('new_tab_edit') : t('new_tab_preview')}
           </button>
         ))}
       </div>
@@ -105,10 +107,10 @@ export default function NewLabel() {
             </div>
             <div style={{ marginTop: 200, display: 'flex', gap: 12 }}>
               <button onClick={() => setTab('edit')} style={{ padding: '8px 16px', cursor: 'pointer' }}>
-                ← Bewerken
+                {t('new_btn_edit')}
               </button>
               <button onClick={handlePrint} style={{ padding: '8px 16px', cursor: 'pointer', fontWeight: 'bold' }}>
-                🖨 Afdrukken
+                {t('new_btn_print')}
               </button>
             </div>
           </div>
