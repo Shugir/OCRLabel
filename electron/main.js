@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const { getConfig, setConfig } = require('./config')
 const { initDb, saveLabel, listLabels, getLabel, deleteLabel, markPrinted } = require('./db')
-const { extractFromImage } = require('./claude')
+const { extractFromImage } = require('./ai')
 const { printLabel } = require('./printer')
 
 const isDev = process.env.NODE_ENV !== 'production'
@@ -48,8 +48,10 @@ ipcMain.handle('file:open', async () => {
 // OCR
 ipcMain.handle('ocr:extract', async (_e, imagePath) => {
   const cfg = getConfig()
-  if (!cfg.anthropicApiKey) throw new Error('API sleutel niet ingesteld. Ga naar Instellingen.')
-  return extractFromImage(imagePath, cfg.anthropicApiKey)
+  if (cfg.aiBackend !== 'ollama' && !cfg.anthropicApiKey) {
+    throw new Error('Anthropic API key not set. Go to Settings.')
+  }
+  return extractFromImage(imagePath, cfg)
 })
 
 // Labels CRUD
