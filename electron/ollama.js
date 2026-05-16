@@ -2,14 +2,32 @@
 const { parseExtractedJson } = require('./claude')
 
 function buildOllamaPrompt() {
-  return `You are reading a food product packaging image. The packaging may have text in multiple languages.
+  return `You are a food label extractor. This packaging may have text in multiple languages (Russian, Polish, Kazakh, etc.).
 
-Focus on finding:
-1. The DUTCH text sections (Nederlands/NL) — look for words like "Ingrediënten", "Kan bevatten", "Bewaren", "Netto gewicht"
-2. The nutrition facts table — look for "Gemiddelde voedingswaarden" or "Voedingswaarden per 100 g" with rows like Energie, Vetten, Koolhydraten, Vezels, Eiwitten, Zout
-3. If no Dutch text is visible, transcribe ALL text you can see including any nutrition table in any language
+Step 1 – Read all visible text from the image in any language.
+Step 2 – Translate all product information into Dutch.
+Step 3 – Look for a nutrition facts table anywhere on the packaging (any language). Extract the numbers.
+Step 4 – Return ONLY the following JSON object, nothing else:
 
-Transcribe all found text exactly as written. Do not summarize. Include every number from the nutrition table.`
+{
+  "product_name": "product name translated to Dutch",
+  "ingredients": "Ingrediënten: full list translated to Dutch",
+  "allergens": "Kan bevatten: allergen statement translated to Dutch",
+  "storage_info": "Bewaren: storage instructions translated to Dutch",
+  "manufacturer": "manufacturer/importer name and address",
+  "net_weight": "e.g. 100g",
+  "energy_kj": "number only from Energie/Энергия row e.g. 2187",
+  "energy_kcal": "number only from Energie/Энергия row e.g. 524",
+  "fat_total": "number only from Vetten/Жиры row",
+  "fat_saturated": "number only from verzadigde/насыщенные row",
+  "carbs_total": "number only from Koolhydraten/Углеводы row",
+  "carbs_sugars": "number only from suikers/сахара row",
+  "fiber": "number only from Vezels/Пищевые волокна row",
+  "protein": "number only from Eiwitten/Белки row",
+  "salt": "number only from Zout/Соль row"
+}
+
+If a nutrition value is not visible, use "". Start response with { and end with }.`
 }
 
 async function ollamaExtract(imagePath, config) {
