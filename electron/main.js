@@ -5,7 +5,7 @@ const { initDb, saveLabel, listLabels, getLabel, deleteLabel, markPrinted } = re
 const { extractFromImage } = require('./ai')
 const { printLabel } = require('./printer')
 
-const isDev = process.env.NODE_ENV !== 'production'
+const isDev = !app.isPackaged
 
 function createWindow() {
   const win = new BrowserWindow({
