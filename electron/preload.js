@@ -19,6 +19,6 @@ contextBridge.exposeInMainWorld('api', {
     markPrinted: (id) => ipcRenderer.invoke('label:markPrinted', id),
   },
   print: {
-    label: (html) => ipcRenderer.invoke('print:label', html),
+    label: (html, copies) => ipcRenderer.invoke('print:label', html, copies),
   },
 })

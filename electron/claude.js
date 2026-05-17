@@ -76,9 +76,9 @@ function parseFromText(text) {
   const fabM = text.match(/(?:Fabrikant|Importeur)[:\s]+([\s\S]*?)(?=\n\n|Gemiddelde|Netto|$)/i)
   const manufacturer = fabM ? fabM[0].replace(/\n/g, ' ').trim().replace(/\s+/g, ' ') : ''
 
-  // Net weight: "Netto gewicht: 100 g" or "100 g e"
+  // Net weight: "Netto gewicht: 100 g e" — strip trailing EU "e" mark
   const wtM = text.match(/Netto\s+gewicht[:\s]+([^\n,]+)/i) || text.match(/(\d+\s*g)\s*(?:e\b|$|\n)/i)
-  const net_weight = wtM ? wtM[1].trim() : ''
+  const net_weight = wtM ? wtM[1].trim().replace(/\s+e\s*$/i, '') : ''
 
   // Product name: first non-empty line, strip leading "(NL) "
   const nameM = text.match(/^(?:\(NL\)\s*)?(.+)/im)
@@ -145,4 +145,4 @@ async function claudeExtract(imagePath, config) {
   return parseExtractedJson(text)
 }
 
-module.exports = { claudeExtract, parseExtractedJson, buildPrompt }
+module.exports = { claudeExtract, parseExtractedJson, parseFromText, buildPrompt }

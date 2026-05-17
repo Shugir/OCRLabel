@@ -57,16 +57,28 @@ describe('ollamaExtract', () => {
   })
 
   it('returns parsed data on success', async () => {
+    const payload = JSON.stringify({
+      response: JSON.stringify({
+        ingredients: 'Ingrediënten: tarwebloem',
+        energy_kj: '2187',
+        energy_kcal: '524',
+        fat_total: '30',
+        net_weight: '100g',
+      }),
+      done: true,
+    })
     mockHttpRequest.mockImplementation((_opts, callback) => {
-      const res = makeRes(JSON.stringify({ message: { content: '{"product_name":"Test"}' } }))
+      const res = makeRes(payload)
       return makeReq(() => callback(res))
     })
 
     const result = await ollamaExtract('/fake/image.jpg', {
       ollamaHost: 'http://localhost:11434',
-      ollamaModel: 'llama3.2-vision',
+      ollamaModel: 'gemma4:31b-cloud',
     })
-    expect(result).toEqual({ product_name: 'Test' })
+    expect(result.ingredients).toBe('Ingrediënten: tarwebloem')
+    expect(result.energy_kj).toBe('2187')
+    expect(result.product_name).toBe('')
   })
 
   it('throws on Ollama error response', async () => {

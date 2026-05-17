@@ -11,9 +11,9 @@ const empty = {
 }
 
 describe('LabelForm', () => {
-  it('renders product name field', () => {
+  it('renders label text area', () => {
     render(<LabelForm data={empty} onChange={() => {}} onSave={() => {}} />)
-    expect(screen.getByLabelText(/product name/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/label text/i)).toBeInTheDocument()
   })
 
   it('renders all 9 nutrition fields', () => {
@@ -29,11 +29,11 @@ describe('LabelForm', () => {
     expect(screen.getByLabelText(/salt/i)).toBeInTheDocument()
   })
 
-  it('calls onChange when a field changes', () => {
+  it('calls onChange with ingredients when text area changes', () => {
     const onChange = vi.fn()
     render(<LabelForm data={empty} onChange={onChange} onSave={() => {}} />)
-    fireEvent.change(screen.getByLabelText(/product name/i), { target: { value: 'Koekjes' } })
-    expect(onChange).toHaveBeenCalledWith('product_name', 'Koekjes')
+    fireEvent.change(screen.getByLabelText(/label text/i), { target: { value: 'Koekjes' } })
+    expect(onChange).toHaveBeenCalledWith('ingredients', 'Koekjes')
   })
 
   it('renders Save button', () => {

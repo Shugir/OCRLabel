@@ -18,6 +18,7 @@ export default function NewLabel() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [savedId, setSavedId] = useState(null)
+  const [copies, setCopies] = useState(1)
   const previewRef = useRef(null)
   const navigate = useNavigate()
   const { t } = useT()
@@ -35,7 +36,15 @@ export default function NewLabel() {
     try {
       const extracted = await window.api.ocr.extract(path)
       if (extracted) {
-        setData({ ...EMPTY, ...extracted })
+        const combined = [
+          extracted.product_name, extracted.ingredients,
+          extracted.allergens, extracted.storage_info, extracted.manufacturer,
+        ].filter(Boolean).join('\n\n')
+        setData({
+          ...EMPTY, ...extracted,
+          ingredients: combined,
+          product_name: '', allergens: '', storage_info: '', manufacturer: '',
+        })
       } else {
         setError(t('new_err_extract'))
       }
@@ -46,7 +55,15 @@ export default function NewLabel() {
     }
   }
 
+  function hasData() {
+    return data.ingredients.trim().length > 0
+  }
+
   async function handleSave() {
+    if (!hasData()) {
+      setError(t('new_err_empty'))
+      return
+    }
     const id = await window.api.label.save({ ...data, image_path: imagePath || '' })
     setSavedId(id)
     setTab('preview')
@@ -55,7 +72,7 @@ export default function NewLabel() {
   async function handlePrint() {
     if (!previewRef.current) return
     const html = previewRef.current.innerHTML
-    await window.api.print.label(html)
+    await window.api.print.label(html, copies)
     if (savedId) await window.api.label.markPrinted(savedId)
     navigate('/')
   }
@@ -80,7 +97,14 @@ export default function NewLabel() {
         {['edit', 'preview'].map((tabKey) => (
           <button
             key={tabKey}
-            onClick={() => setTab(tabKey)}
+            onClick={() => {
+              if (tabKey === 'preview' && !hasData()) {
+                setError(t('new_err_empty'))
+                return
+              }
+              setError(null)
+              setTab(tabKey)
+            }}
             style={{
               padding: '8px 20px',
               cursor: 'pointer',
@@ -99,16 +123,29 @@ export default function NewLabel() {
         {tab === 'edit' ? (
           <LabelForm data={data} onChange={handleChange} onSave={handleSave} />
         ) : (
-          <div style={{ padding: 24, overflowY: 'auto', height: '100%' }}>
-            <div style={{ transform: 'scale(2)', transformOrigin: 'top left', marginBottom: 16 }}>
-              <div ref={previewRef}>
-                <LabelPreview data={data} />
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+              <div style={{ transform: 'scale(2)', transformOrigin: 'top left' }}>
+                <div ref={previewRef}>
+                  <LabelPreview data={data} />
+                </div>
               </div>
             </div>
-            <div style={{ marginTop: 200, display: 'flex', gap: 12 }}>
+            <div style={{ flexShrink: 0, padding: '12px 24px', borderTop: '1px solid #ddd', display: 'flex', gap: 12, alignItems: 'center', background: '#fff' }}>
               <button onClick={() => setTab('edit')} style={{ padding: '8px 16px', cursor: 'pointer' }}>
                 {t('new_btn_edit')}
               </button>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
+                Copies:
+                <input
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={copies}
+                  onChange={(e) => setCopies(Math.max(1, Math.min(99, parseInt(e.target.value) || 1)))}
+                  style={{ width: 52, padding: '6px 8px', fontSize: 14, textAlign: 'center' }}
+                />
+              </label>
               <button onClick={handlePrint} style={{ padding: '8px 16px', cursor: 'pointer', fontWeight: 'bold' }}>
                 {t('new_btn_print')}
               </button>

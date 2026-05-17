@@ -61,9 +61,9 @@ ipcMain.handle('label:get', (_e, id) => getLabel(id))
 ipcMain.handle('label:delete', (_e, id) => deleteLabel(id))
 
 // Print
-ipcMain.handle('print:label', async (_e, html) => {
+ipcMain.handle('print:label', async (_e, html, copies) => {
   const cfg = getConfig()
-  await printLabel(html, cfg.printerName || '')
+  await printLabel(html, cfg.printerName || '', copies || 1)
   return true
 })
 

@@ -4,11 +4,9 @@ import { render, screen } from '@testing-library/react'
 import LabelPreview from '../src/components/LabelPreview.jsx'
 
 const data = {
-  product_name: 'Wafels Melk',
-  ingredients: 'Ingrediënten: tarwebloem, palmolie, suiker',
-  allergens: 'Kan bevatten: noten, sesam',
-  storage_info: 'Bewaren op kamertemperatuur',
-  manufacturer: 'Roshen Europe Sp. z o.o.',
+  product_name: '',
+  ingredients: '(NL) Wafels Melk\n\nIngrediënten: tarwebloem, palmolie, suiker\n\nKan bevatten: noten, sesam\n\nBewaren op kamertemperatuur\n\nFabrikant/Importeur: Roshen Europe Sp. z o.o.',
+  allergens: '', storage_info: '', manufacturer: '',
   net_weight: '100g',
   energy_kj: '2187', energy_kcal: '521',
   fat_total: '36', fat_saturated: '16',
@@ -17,9 +15,9 @@ const data = {
 }
 
 describe('LabelPreview', () => {
-  it('renders product name with (NL) prefix', () => {
+  it('renders combined label text', () => {
     render(<LabelPreview data={data} />)
-    expect(screen.getByText(/\(NL\) Wafels Melk/)).toBeInTheDocument()
+    expect(screen.getByText(/Wafels Melk/)).toBeInTheDocument()
   })
 
   it('renders ingredients text', () => {
